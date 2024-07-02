@@ -7,6 +7,8 @@
 // Execute `rustlings hint from_into` or use the `hint` watch subcommand for a
 // hint.
 
+use std::num::ParseIntError;
+
 #[derive(Debug)]
 struct Person {
     name: String,
@@ -23,7 +25,6 @@ impl Default for Person {
         }
     }
 }
-
 
 // Your task is to complete this implementation in order for the line `let p1 =
 // Person::from("Mark,20")` to compile. Please note that you'll need to parse the
@@ -44,7 +45,30 @@ impl Default for Person {
 // I AM NOT DONE
 
 impl From<&str> for Person {
-    fn from(s: &str) -> Person {}
+    fn from(s: &str) -> Person {
+        if (s.len() == 0) {
+            return Person::default();
+        }
+        let mut splitted = s.split(",");
+        if (splitted.clone().count() != 2) {
+            return Person::default();
+        }
+
+        let name = match splitted.next() {
+            Some(v) if !v.is_empty() => v.trim().to_string(),
+            _ => return Person::default(),
+        };
+
+        let age = match splitted.next() {
+            Some(v) if !v.trim().is_empty() => match v.trim().parse::<usize>() {
+                Ok(parsed_age) => parsed_age,
+                Err(_) => return Person::default(),
+            },
+            _ => return Person::default(),
+        };
+
+        return Person { name, age };
+    }
 }
 
 fn main() {

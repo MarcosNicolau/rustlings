@@ -27,6 +27,8 @@ enum ParsePersonError {
     BadLen,
     // Empty name field
     NoName,
+    // Empty age field
+    NoAge,
     // Wrapped error from parse::<usize>()
     ParseInt(ParseIntError),
 }
@@ -48,6 +50,30 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if (s.len() == 0) {
+            return Err(ParsePersonError::Empty);
+        }
+
+        let mut splitted = s.split(",");
+
+        if (splitted.clone().count() != 2) {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        let name = match splitted.next() {
+            Some(v) if !v.is_empty() => v.trim().to_string(),
+            _ => return Err(ParsePersonError::NoName),
+        };
+
+        let age = match splitted.next() {
+            Some(v) if !v.trim().is_empty() => match v.trim().parse::<usize>() {
+                Ok(parsed_age) => parsed_age,
+                Err(e) => return Err(ParsePersonError::ParseInt(e)),
+            },
+            _ => return Err(ParsePersonError::NoAge),
+        };
+
+        return Ok(Person { name, age });
     }
 }
 
@@ -76,7 +102,7 @@ mod tests {
     fn missing_age() {
         assert!(matches!(
             "John,".parse::<Person>(),
-            Err(ParsePersonError::ParseInt(_))
+            Err(ParsePersonError::NoAge)
         ));
     }
 

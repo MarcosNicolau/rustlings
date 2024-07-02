@@ -24,9 +24,13 @@ impl Queue {
             second_half: vec![6, 7, 8, 9, 10],
         }
     }
+
+    fn some(self) {}
 }
 
 fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
+    let tx2 = tx.clone();
+
     thread::spawn(move || {
         for val in q.first_half {
             println!("sending {:?}", val);
@@ -38,7 +42,7 @@ fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
     thread::spawn(move || {
         for val in q.second_half {
             println!("sending {:?}", val);
-            tx.send(val).unwrap();
+            tx2.send(val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
